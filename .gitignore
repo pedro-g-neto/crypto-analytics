@@ -1,0 +1,9 @@
+.env
+env
+venv
+*env
+*venv
+_pycache__/
+*pycache*
+*.parquet
+*.json

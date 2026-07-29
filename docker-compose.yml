@@ -1,0 +1,39 @@
+  version: '3'
+  services:
+
+    minio:
+      image: minio/minio
+      container_name: minio_crypto
+      environment:
+        - MINIO_ACCESS_KEY= ${MINIO_ACCESS_KEY}
+        - MINIO_SECRET_KEY= ${MINIO_SECRET_KEY}
+      ports:
+        - "9000:9000"
+        - "9001:9001"
+      volumes:
+        - minio_data:/data
+      command: server /data --console-address ":9001"
+
+    postgres_data:
+      image: postgres:16
+      container_name: postgres_data
+      environment:
+        - POSTGRES_USER= ${POSTGRES_USER}
+        - POSTGRES_PASSWORD= ${POSTGRES_PASSWORD}
+        - POSTGRES_DB= ${POSTGRES_DB}
+        - APP_DB_USER= ${APP_DB_USER}
+        - APP_DB_PASS= ${APP_DB_PASS}
+        - APP_DB_NAME= ${APP_DB_NAME}
+      ports:
+        - "5432:5432"
+      volumes:
+        - pg_data:/var/lib/postgresql/data
+      healthcheck:
+        test: ["CMD", "pg_isready", "-q", "-d", "crypto_db", "-U", "postgres"]
+        timeout: 45s
+        interval: 10s
+        retries: 10
+
+  volumes:
+    minio_data:
+    pg_data:
