@@ -11,7 +11,7 @@ O pipeline é totalmente automatizado e construído com foco em escalabilidade, 
 
 ## Arquitetura de Dados
 
-![Diagrama Arquitetural](assets\diagrama_arquitetural.svg)
+![Diagrama Arquitetural](/assets/diagrama_arquitetural.svg)
 
 1. **Origem:** Extração via API da Binance utilizando `ccxt`.
 2. **Camada Bronze:** Armazenamento bruto no formato `.json` dentro do Data Lake (MinIO).
@@ -35,8 +35,8 @@ O pipeline é totalmente automatizado e construído com foco em escalabilidade, 
 
 ## Dashboard Executivo
 
-![Dashboard](assets\painel1.png)
-![Dashboard](assets\painel2.png)
+![Dashboard](/assets/painel1.png)
+![Dashboard](/assets/painel2.png)
 
 O painel final permite ao usuário navegar entre os ativos disponíveis (Bitcoin, Ethereum, Solana e Cardano) para analisar tendências históricas de preço e variação percentual desde o ano de 2018.
 
@@ -52,8 +52,8 @@ O painel final permite ao usuário navegar entre os ativos disponíveis (Bitcoin
 
 1. **Clone o repositório:**
    ```bash
-   git clone [https://github.com/pedro-g-neto/crypto_analytics.git](https://github.com/pedro-g-neto/crypto_analytics.git)
-   cd crypto_analytics```
+   git clone [https://github.com/pedro-g-neto/crypto-analytics.git](https://github.com/pedro-g-neto/crypto-analytics.git)
+   cd crypto-analytics```
 2. **Configure as variáveis de ambiente:**
 Crie um arquivo .env na raiz do projeto com as chaves necessárias (S3, Postgres, Airflow).
 3. Inicie a infraestrutura:
