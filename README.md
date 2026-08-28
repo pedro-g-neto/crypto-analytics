@@ -1,4 +1,4 @@
-# Cripto Analytics: Data Lakehouse Multi-Ativos
+# Crypto Analytics: Data Lakehouse Multi-Ativos
 
 ![Python](https://img.shields.io/badge/Python-3.12-yellow)
 
