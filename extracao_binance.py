@@ -22,63 +22,63 @@ exchange = ccxt.binance({
     'enableRateLimit': True
 })
 
-symbol = 'BTC/USDT'
+simbolos = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'ADA/USDT']
 timeframe = '1d'
 NOME_BUCKET = 'bronze'
 
 def extrair_carga_full():
-    print(f'Iniciando a extração de {symbol} na Binance...')
-    data_inicio = '2020-01-01T00:00:00Z'
-    since = exchange.parse8601(data_inicio)
-    all = []
+    data_inicio = '2018-01-01T00:00:00Z'
+    
+    for symbol in simbolos:
+        print(f'\n--- Iniciando a extração de {symbol} na Binance ---')
+        since = exchange.parse8601(data_inicio)
+        all = []
 
-    try:
-        while True:
-            dados = exchange.fetch_ohlcv(symbol, timeframe, since=since, limit=1000)
+        try:
+            while True:
+                dados = exchange.fetch_ohlcv(symbol, timeframe, since=since, limit=1000)
+                if not dados:
+                    break
+                all.extend(dados)
+                ultimo_timestamp = dados[-1][0]
+                since = ultimo_timestamp + 1
 
-            if not dados:
-                break
+                print(f'[{symbol}] Registros extraídos: {len(all)}')
+                time.sleep(exchange.rateLimit / 1000)
 
-            all.extend(dados)
-            ultimo_timestamp = dados[-1][0]
-            since = ultimo_timestamp + 1  # Incrementa o timestamp para a próxima chamada
+            print(f"Enviando dados de {symbol} para o MinIO...")
+            agora = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
-            print(f'Extração de lote concluída. Total de registros extraídos até agora: {len(all)}')
-
-            time.sleep(exchange.rateLimit / 1000)  # Respeita o limite de taxa da API
-        print("\nExtração concluída com sucesso. Enviando dados para o MinIO...")
-
-        agora = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        nome_arquivo = f"binance_{symbol.replace('/','_')}/bronze_FULL_ohlcv_{agora}.json"
-# Converte os dados para JSON e envia para o MinIO
-        dados_json = json.dumps(all)
-        buffer = io.BytesIO(dados_json.encode('utf-8'))
-
-        s3_client.upload_fileobj(buffer, NOME_BUCKET, nome_arquivo)
-
-        print(f"Sucesso! Histórico gravado no bucket {NOME_BUCKET} com o nome {nome_arquivo}")
-    except Exception as e:
-        print(f"Erro ao extrair dados: {e}")
+            nome_arquivo = f"binance_{symbol.replace('/','_')}/bronze_FULL_ohlcv_{agora}.json"
+            
+            dados_json = json.dumps(all)
+            buffer = io.BytesIO(dados_json.encode('utf-8'))
+            s3_client.upload_fileobj(buffer, NOME_BUCKET, nome_arquivo)
+            print(f"Sucesso! {symbol} gravado no bucket {NOME_BUCKET} com o nome {nome_arquivo}")
+            
+        except Exception as e:
+            print(f"Erro ao extrair dados de {symbol}: {e}")
 
 
 
 
 def extrair_carga_incremental():
-    print(f'Iniciando a extração de {symbol} na Binance...')
-    try:
-        dados_brutos = exchange.fetch_ohlcv(symbol, timeframe, limit=5)
-        print("\nExtração concluída com sucesso. Enviando dados para o MinIO...")
+    for symbol in simbolos:
+        print(f'Iniciando a extração incremental de {symbol} na Binance...')
+        try:
+            dados_brutos = exchange.fetch_ohlcv(symbol, timeframe, limit=5)
 
-        agora = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        nome_arquivo = f"binance_{symbol.replace('/','_')}_{agora}.json"
+            agora = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            nome_arquivo = f"binance_{symbol.replace('/','_')}/bronze_INC_ohlcv_{agora}.json"
 
-        dados_json = json.dumps(dados_brutos)
-        buffer = io.BytesIO(dados_json.encode('utf-8'))
+            dados_json = json.dumps(dados_brutos)
+            buffer = io.BytesIO(dados_json.encode('utf-8'))
 
-        s3_client.upload_fileobj(buffer, NOME_BUCKET, nome_arquivo)
-        print(f"Arquivo {nome_arquivo} enviado para o bucket {NOME_BUCKET}")
-    except Exception as e:
-        print(f"Erro ao extrair dados: {e}")
+            s3_client.upload_fileobj(buffer, NOME_BUCKET, nome_arquivo)
+            print(f"Sucesso! Arquivo {nome_arquivo} enviado para o bucket {NOME_BUCKET}")
+            
+        except Exception as e:
+            print(f"Erro ao extrair dados incrementais de {symbol}: {e}")
 
 if __name__ == "__main__":
     extrair_carga_full()
