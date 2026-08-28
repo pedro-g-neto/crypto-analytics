@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: camada_silver
+    schema: public 
+    tables:
+      - name: staging_cripto_ativos
+        description: "Tabela de staging para ativos de criptomoedas"

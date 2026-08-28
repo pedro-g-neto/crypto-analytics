@@ -1,9 +1,61 @@
+# ==========================================
+# 1. Credenciais e Variáveis de Ambiente
+# ==========================================
 .env
-env
-venv
-*env
-*venv
-_pycache__/
-*pycache*
+*.env
+profiles.yml
+**/profiles.yml
+.user.yml
+**/user.yml
+
+# ==========================================
+# 2. Ambientes Virtuais Python
+# ==========================================
+venv/
+env/
+*venv/
+*env/
+.venv/
+
+# ==========================================
+# 3. Caches e Binários Python
+# ==========================================
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# ==========================================
+# 4. Artefatos e Logs do dbt
+# ==========================================
+target/
+**/target/
+dbt_packages/
+**/dbt_packages/
+logs/
+**/logs/
+*.log
+
+# ==========================================
+# 5. Dados Locais e Volumes de Aplicações
+# ==========================================
+metabase-data/
+**/metabase-data/
+*.mv.db
+*.trace.db
+pg_data/
+**/pg_data/
+
+# ==========================================
+# 6. Dados Brutos e Arquivos Temporários
+# ==========================================
 *.parquet
 *.json
+*.csv
+
+# ==========================================
+# 7. Arquivos de Sistema Operacional e IDE
+# ==========================================
+.DS_Store
+Thumbs.db
+.vscode/

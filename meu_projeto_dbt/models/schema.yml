@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: gold_cripto_indicadores
+    description: "Tabela de indicadores financeiros diários das criptomoedas, contendo variação percentual e volatilidade."
+    columns:
+      - name: simbolo
+        description: "Par de negociação do ativo"
+        tests:
+          - not_null
+
+      - name: data_referencia
+        description: "Data do pregão (Fuso local)."
+        tests:
+          - not_null
+          
+      - name: preco_abertura
+        description: "Preço de abertura em Dólares."
+        tests:
+          - not_null
+
+      - name: variacao_percentual
+        description: "Variação percentual do preço de fechamento em relação à abertura."
+        tests:
+          - not_null
