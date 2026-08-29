@@ -1,10 +1,9 @@
-# Cripto Analytics: Data Lakehouse Multi-Ativos
+# Crypto Analytics: Data Lakehouse Multi-Ativos
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![Apache Airflow](https://img.shields.io/badge/Airflow-2.9.2-017CEE?logo=apacheairflow&logoColor=white)
 ![dbt](https://img.shields.io/badge/dbt-1.7+-FF694B?logo=dbt&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
-![MinIO](https://img.shields.io/badge/MinIO-S3-Compatible-EE6F00?logo=minio&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![Metabase](https://img.shields.io/badge/Metabase-BI-509C3D?logo=metabase&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
