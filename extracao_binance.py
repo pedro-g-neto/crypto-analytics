@@ -81,4 +81,4 @@ def extrair_carga_incremental():
             print(f"Erro ao extrair dados incrementais de {symbol}: {e}")
 
 if __name__ == "__main__":
-    extrair_carga_full()
+    extrair_carga_incremental()
