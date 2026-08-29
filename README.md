@@ -55,6 +55,19 @@ Binance API → Bronze (JSON) → Silver (Parquet) → PostgreSQL (Staging) → 
 
 ---
 
+## Dashboard Executivo
+
+![Dashboard](assets/painel1.png)
+![Dashboard](assets/painel2.png)
+
+O painel final permite ao usuário navegar entre os ativos disponíveis (Bitcoin, Ethereum, Solana e Cardano) para analisar:
+- Tendências históricas de preço desde 2018
+- Variação percentual diária (Fechamento vs Abertura)
+- Amplitude de preço (Máxima - Mínima) como proxy de volatilidade
+- Volume de negociação
+
+---
+
 ## Como Executar o Projeto
 
 ### Pré-requisitos
@@ -122,7 +135,7 @@ cp meu_projeto_dbt/profiles.yml.example meu_projeto_dbt/profiles.yml
 
 > **Nota:** O arquivo `profiles.yml` usa os mesmos valores do `.env` acima (host `postgres_data`, usuário `postgres`, senha `postgres`, banco `crypto_db`).
 
-#### 4. Inicie a infraestrutura
+#### 5. Inicie a infraestrutura
 
 ```bash
 docker compose up -d
@@ -130,7 +143,7 @@ docker compose up -d
 
 Aguarde ~2 minutos para todos os containers estarem saudáveis.
 
-#### 5. Verifique os serviços
+#### 6. Verifique os serviços
 
 | Serviço | URL | Credenciais Iniciais |
 |---------|-----|---------------------|
@@ -139,13 +152,13 @@ Aguarde ~2 minutos para todos os containers estarem saudáveis.
 | **Metabase** | http://localhost:3000 | Configure na primeira vez |
 | **PostgreSQL** | localhost:5433 | Usuário: `postgres` / Senha: `postgres` / DB: `crypto_db` |
 
-#### 6. Crie os buckets no MinIO (opcional - o pipeline cria automaticamente)
+#### 7. Crie os buckets no MinIO (opcional - o pipeline cria automaticamente)
 
 Acesse o MinIO Console (http://localhost:9001) e crie os buckets:
 - `bronze` (para dados brutos)
 - `silver` (para dados processados)
 
-#### 7. Execute o pipeline manualmente (opcional)
+#### 8. Execute o pipeline manualmente (opcional)
 
 ```bash
 # Extração completa (carga histórica desde 2018)
@@ -195,17 +208,120 @@ crypto_analytics/
 
 ---
 
-## Dashboard Executivo
+## dbt Project: `meu_projeto_dbt/`
 
-| Visão Geral | Detalhamento por Ativo |
-|-------------|------------------------|
-| ![Dashboard](assets/painel1.png) | ![Dashboard](assets/painel2.png) |
+### `dbt_project.yml`
 
-O painel final permite ao usuário navegar entre os ativos disponíveis (**Bitcoin, Ethereum, Solana e Cardano**) para analisar:
-- Tendências históricas de preço desde 2018
-- Variação percentual diária (Fechamento vs Abertura)
-- Amplitude de preço (Máxima - Mínima) como proxy de volatilidade
-- Volume de negociação
+```yaml
+name: 'meu_projeto_dbt'
+version: '1.0.0'
+profile: 'meu_projeto_dbt'
+```
+
+### `profiles.yml` (exemplo)
+
+```yaml
+meu_projeto_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      threads: 1
+      host: postgres_data
+      port: 5432
+      user: postgres
+      pass: postgres
+      dbname: crypto_db
+      schema: public
+```
+
+### `models/sources.yml` - Definição da fonte
+
+```yaml
+sources:
+  - name: camada_silver
+    schema: public 
+    tables:
+      - name: staging_cripto_ativos
+        description: "Tabela de staging para ativos de criptomoedas"
+```
+
+### `models/gold_cripto_indicadores.sql` - Modelo de indicadores
+
+```sql
+WITH historico_precos AS (
+    SELECT * 
+    FROM {{ source('camada_silver', 'staging_cripto_ativos') }}
+)
+
+SELECT
+    simbolo,
+    DATE(data_pregao) AS data_referencia,
+    preco_abertura,
+    preco_fechamento,
+    
+    -- Variação Percentual Diária
+    ROUND(CAST(((preco_fechamento - preco_abertura) / preco_abertura) * 100 AS NUMERIC), 2) AS variacao_percentual,
+    
+    -- Amplitude de Preço
+    ROUND(CAST((preco_maximo - preco_minimo) AS NUMERIC), 2) AS amplitude_dolares,
+    
+    volume
+FROM historico_precos
+ORDER BY simbolo ASC, data_referencia DESC
+```
+
+### `models/schema.yml` - Testes de qualidade de dados
+
+```yaml
+version: 2
+
+models:
+  - name: gold_cripto_indicadores
+    description: "Tabela de indicadores financeiros diários das criptomoedas, contendo variação percentual e volatilidade."
+    columns:
+      - name: simbolo
+        description: "Par de negociação do ativo"
+        tests:
+          - not_null
+          - unique
+
+      - name: data_referencia
+        description: "Data do pregão (Fuso local)."
+        tests:
+          - not_null
+
+      - name: preco_abertura
+        description: "Preço de abertura em Dólares."
+        tests:
+          - not_null
+
+      - name: variacao_percentual
+        description: "Variação percentual do preço de fechamento em relação à abertura."
+        tests:
+          - not_null
+
+      - name: amplitude_dolares
+        description: "Amplitude de preço (máxima - mínima) em Dólares."
+        tests:
+          - not_null
+```
+
+---
+
+## Estrutura das Tabelas Gold (dbt)
+
+### `gold_cripto_indicadores`
+
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| `simbolo` | VARCHAR | Par de negociação (ex: BTC/USDT) |
+| `data_referencia` | DATE | Data do pregão (fuso América/Recife) |
+| `preco_abertura` | NUMERIC | Preço de abertura (USD) |
+| `preco_fechamento` | NUMERIC | Preço de fechamento (USD) |
+| `variacao_percentual` | NUMERIC(10,2) | `(fechamento - abertura) / abertura * 100` |
+| `amplitude_dolares` | NUMERIC(10,2) | `maxima - minima` (volatilidade) |
+| `volume` | NUMERIC | Volume negociado |
 
 ---
 
@@ -223,11 +339,8 @@ O painel final permite ao usuário navegar entre os ativos disponíveis (**Bitco
 
 ### 📊 Data Quality com dbt
 Testes que garantem integridade dos dados:
-```yaml
-# schema.yml - Exemplos
-- not_null: simbolo, data_referencia, preco_abertura, variacao_percentual
-- unique: simbolo + data_referencia (chave primária composta)
-```
+- `not_null`: Garante que colunas críticas nunca sejam nulas
+- `unique`: Chave primária composta (`simbolo` + `data_referencia`)
 
 ### 🌐 Multi-Ativo Sem Duplicação
 - Pipeline **agnóstico** processa BTC, ETH, SOL, ADA em loop único
@@ -283,22 +396,6 @@ cd meu_projeto_dbt && dbt run --profiles-dir .
 - Porta: `5432` (interna) / `5433` (exposta no host)
 - Banco: `crypto_db`
 - Usuário/Senha: conforme `.env`
-
----
-
-## Estrutura das Tabelas Gold (dbt)
-
-### `gold_cripto_indicadores`
-
-| Coluna | Tipo | Descrição |
-|--------|------|-----------|
-| `simbolo` | VARCHAR | Par de negociação (ex: BTC/USDT) |
-| `data_referencia` | DATE | Data do pregão (fuso América/Recife) |
-| `preco_abertura` | NUMERIC | Preço de abertura (USD) |
-| `preco_fechamento` | NUMERIC | Preço de fechamento (USD) |
-| `variacao_percentual` | NUMERIC(10,2) | `(fechamento - abertura) / abertura * 100` |
-| `amplitude_dolares` | NUMERIC(10,2) | `maxima - minima` (volatilidade) |
-| `volume` | NUMERIC | Volume negociado |
 
 ---
 
