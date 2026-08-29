@@ -203,6 +203,7 @@ crypto_analytics/
 ├── extracao_binance.py         # Bronze: API Binance → MinIO
 ├── transformacao_silver.py     # Silver: JSON → Parquet consolidado
 ├── carga_postgres.py           # Gold: Parquet → PostgreSQL
+├── LICENSE
 └── README.md
 ```
 
@@ -417,9 +418,10 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## Autor
 
-**Pedro Gomes** - Curso Livre de Engenharia de Dados
+**Pedro Gomes de Andrade Neto**
 
 - GitHub: [@pedro-g-neto](https://github.com/pedro-g-neto)
+- Linkedin: [@pedrogneto](https://linkedin.com/in/pedrogneto)
 
 ---
 
