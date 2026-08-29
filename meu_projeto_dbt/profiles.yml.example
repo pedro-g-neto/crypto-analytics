@@ -1,0 +1,18 @@
+# ==========================================
+# PERFIL DE CONEXÃO DBT - TEMPLATE
+# ==========================================
+# Copie este arquivo para "profiles.yml" e ajuste os valores.
+# Nunca commita credenciais reais no Git!
+
+meu_projeto_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      threads: 1
+      host: postgres_data        # Nome do serviço PostgreSQL no Docker
+      port: 5432
+      user: postgres
+      pass: postgres             # Senha do PostgreSQL
+      dbname: crypto_db
+      schema: public

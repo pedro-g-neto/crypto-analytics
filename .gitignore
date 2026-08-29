@@ -1,12 +1,14 @@
 # ==========================================
 # 1. Credenciais e Variáveis de Ambiente
 # ==========================================
+# Arquivos de credenciais reais - NUNCA versionados
 .env
-*.env
 profiles.yml
-**/profiles.yml
 .user.yml
-**/user.yml
+
+# Templates de exemplo - versionados para ajudar novos usuários
+!.env.example
+!profiles.yml.example
 
 # ==========================================
 # 2. Ambientes Virtuais Python
@@ -49,9 +51,12 @@ pg_data/
 # ==========================================
 # 6. Dados Brutos e Arquivos Temporários
 # ==========================================
+# Ignoramos apenas dados da camada de processamento, não fontes/config
 *.parquet
 *.json
 *.csv
+# Dados brutos da Binance após processamento
+binance_*/**/bronze_*
 
 # ==========================================
 # 7. Arquivos de Sistema Operacional e IDE

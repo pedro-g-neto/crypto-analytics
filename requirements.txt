@@ -1,0 +1,23 @@
+# Core ETL
+pandas==3.0.5
+pyarrow==25.0.0
+ccxt==4.5.69
+
+# Cloud / Storage
+boto3==1.43.58
+
+# Database
+sqlalchemy==2.0.51
+psycopg2-binary==2.9.12
+
+# Configuration
+python-dotenv==1.2.2
+
+# dbt
+dbt-core==1.12.3
+dbt-postgres==1.11.0
+
+# Utilities
+pytz==2026.3
+requests==2.34.2
+PyYAML==6.0.3
